@@ -50,9 +50,11 @@ export default function Header() {
             <nav className={style.gnb}>
                 {username && (
                     <>
-                        <Link to="/">새글 등록</Link>
+                        <Link to="/create">새글등록</Link>
                         <span onClick={logout}>로그아웃</span>
-                        <span>{username}님 입장</span>
+                        <Link to={`/userpage/${username}`}>
+                            {username}님 입장
+                        </Link>
                     </>
                 )}
                 {!username && (

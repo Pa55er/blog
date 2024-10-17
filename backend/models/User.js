@@ -11,13 +11,24 @@ const UserSchema = new Schema(
         password: { type: String, required: true },
         userImage: { type: String, default: "" }, // userImage는 String이고, 기본값은 ""이다.
         createdAt: Date,
-        update: Date,
+        updatedAt: Date,
     }
     // {
     //     timestamps: true,
     // },
     // { versionKey: false }
 );
+
+UserSchema.pre("save", function (next) {
+    const currentDate = new Date();
+    currentDate.setHours(currentDate.getHours() + 9); // KST is UTC +9
+
+    this.updatedAt = currentDate;
+
+    if (!this.createdAt) this.createdAt = currentDate;
+
+    next();
+});
 
 const UserModal = model("User", UserSchema); // UserModal이라는 이름으로 UserSchema를 model로 만들기
 module.exports = UserModal;
