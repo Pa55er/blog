@@ -8,7 +8,6 @@ export default function RegisterPage() {
 
     const register = async (e) => {
         e.preventDefault();
-        console.log(username, password, passwordCheck);
 
         if (!/^[a-zA-Z][a-zA-Z0-9]{3,}$/.test(username)) {
             alert("아이디는 4자 이상이어야 하며 영어로 시작해야 합니다.");

@@ -66,3 +66,13 @@
 .PostDetailPage .commentlist {
 	padding: 1rem;
 }
+.author {
+	font-size: 0.75rem;
+	color: dodgerblue;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.author:hover {
+	color: rgb(1, 75, 148);
+}

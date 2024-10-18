@@ -1,36 +1,27 @@
-import { Link, useParams } from "react-router-dom";
 import style from "../styles/PostDetailPage.module.css";
-import { useEffect, useState } from "react";
+// Toast UI Editor
 import { Viewer } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor-viewer.css";
+
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import CommentSection from "../components/CommentSection";
 
 export default function PostDetailPage() {
-    const { postId } = useParams();
-    const [postInfo, setPostInfo] = useState(null);
-    const [formattedDate, setFormattedDate] = useState("");
+    // 로그인한 사용자가 작성자와 같은 경우 수정, 삭제 버튼이 보이게 하기 위해
+    // user 정보를 store에서 가져옴
     const user = useSelector((state) => state.user.user);
-    const username = user?.username;
+    const userName = user?.username;
 
-    useEffect(() => {
-        const fetchPostDetail = async () => {
-            try {
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/postDetail/${postId}`
-                );
-                const data = await response.json();
-                setPostInfo(data);
-                setFormattedDate(formatDate(data.createdAt));
-            } catch (e) {
-                console.error(e);
-            }
-        };
-        fetchPostDetail();
-    }, [postId]);
+    const { postId } = useParams();
 
-    const formatDate = (data) => {
-        const d = new Date(data);
-        return d.toLocaleDateString("ko-KR", {
+    const [postInfo, setPostInfo] = useState();
+    const [formattedDate, setFormattedDate] = useState("");
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString("ko-KR", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
@@ -40,7 +31,26 @@ export default function PostDetailPage() {
         });
     };
 
-    const deletePost = async () => {
+    useEffect(() => {
+        const fetchPostDetail = async () => {
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/postDetail/${postId}`
+                );
+                const data = await response.json();
+
+                setPostInfo(data);
+                setFormattedDate(formatDate(data.createdAt));
+            } catch (error) {
+                console.error("Error fetching post detail:", error);
+            }
+        };
+
+        fetchPostDetail();
+    }, [postId]);
+
+    // 글 삭제
+    const deletePost = () => {
         fetch(`${import.meta.env.VITE_API_URL}/deletePost/${postId}`, {
             method: "DELETE",
         })
@@ -64,14 +74,22 @@ export default function PostDetailPage() {
                 <div className={style.detailimg}>
                     <img
                         src={`${import.meta.env.VITE_API_URL}/${
-                            postInfo.cover
+                            postInfo?.cover
                         }`}
                         alt=""
                     />
-                    <h3>{postInfo.title}</h3>
+                    <h3>{postInfo?.title}</h3>
                 </div>
                 <div className={style.info}>
-                    <p>작성자: {postInfo.author}</p>
+                    <p>
+                        작성자:{" "}
+                        <Link
+                            to={`/userpage/${postInfo.author}`}
+                            className={style.author}
+                        >
+                            {postInfo.author}
+                        </Link>
+                    </p>
                     <p>작성일: {formattedDate}</p>
                 </div>
                 <div className={style.summary}>{postInfo.summary}</div>
@@ -82,7 +100,7 @@ export default function PostDetailPage() {
 
             <section className={style.btns}>
                 {/* 로그인한 사용자만 글을 수정, 삭제할 수 있습니다. */}
-                {username === postInfo?.author && (
+                {userName === postInfo?.author && (
                     <>
                         <Link to={`/edit/${postId}`}>수정</Link>
                         <span onClick={deletePost}>삭제</span>
@@ -91,7 +109,7 @@ export default function PostDetailPage() {
                 <Link to="/">목록으로</Link>
             </section>
 
-            <section className={style.commentlist}>댓글목록</section>
+            <CommentSection postId={postId} />
         </section>
     );
 }

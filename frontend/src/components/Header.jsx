@@ -35,11 +35,12 @@ export default function Header() {
     }, [fetchProfile, location]);
 
     const logout = async () => {
-        fetch(`${import.meta.env.VITE_API_URL}/logout`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
             credentials: "include",
             method: "POST",
         });
         dispatch(setUserAllInfo(null));
+        navigate("/");
     };
 
     return (

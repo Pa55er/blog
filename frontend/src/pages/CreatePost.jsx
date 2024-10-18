@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import style from "../styles/CreatePost.module.css";
 import ToastEditor from "../components/ToastEditor";
 import { useNavigate } from "react-router-dom";
@@ -10,28 +11,36 @@ export default function CreatePost() {
     const [content, setContent] = useState("");
     const navigate = useNavigate();
 
+    // 백엔드로 데이터를 보내는 함수
     const createNewPost = async (e) => {
         e.preventDefault();
 
+        // FormData 객체 생성
         const data = new FormData();
+        // set과 append의 차이점
+        // set은 같은 키값을 가지면 덮어쓰기를 하고
+        // append는 같은 키값을 가지면 추가로 붙여준다.
         data.set("title", title);
         data.set("summary", summary);
-        data.set("files", files[0]);
         data.set("content", content);
+        data.append("files", files[0]); // files는 배열이기 때문에 0번째 인덱스를 사용
 
-        const response = await fetch(
+        // fetch 함수로 백엔드로 데이터 전송
+        const respose = await fetch(
             `${import.meta.env.VITE_API_URL}/postWrite`,
             {
                 method: "POST",
                 body: data,
-                credentials: "include",
+                credentials: "include", // 쿠키를 전송하기 위해 필요
             }
         );
 
-        if (response.ok) {
+        // 응답이 성공적으로 왔을 때
+        if (respose.ok) {
+            //글 작성이 완료되면 홈으로 이동
             navigate("/");
         } else {
-            alert("글 작성에 실패했습니다");
+            alert("글 등록에 실패했습니다.");
         }
     };
 
@@ -44,6 +53,7 @@ export default function CreatePost() {
                     type="text"
                     id="title"
                     name="title"
+                    placeholder="제목을 입력해 주세요"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                 />
@@ -52,6 +62,7 @@ export default function CreatePost() {
                     type="text"
                     id="summary"
                     name="summary"
+                    placeholder="요약내용을 입력해 주세요 100자 이내"
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
                 />
@@ -64,7 +75,7 @@ export default function CreatePost() {
                 />
                 <label>내용</label>
                 <ToastEditor initialValue={content} onChange={setContent} />
-                <button type="submit">등록</button>
+                <button>등록</button>
             </form>
         </section>
     );
